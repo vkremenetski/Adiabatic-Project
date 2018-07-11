@@ -150,9 +150,9 @@ void timeToText(string title,int N, std::vector<int> positions, std::vector<Real
 }
 int main(int argc, char* argv[]) {
     int N = 6;
-    int mypositions[] = {1,N/2,N,N/2-1,N/2};
+    int mypositions[] = {1,N/2,(3*N)/4,N/2-1,N/2};
     Real myweights[] = {3,-4,-4,-2};
     std::vector<int> positions(mypositions,mypositions+5);
     std::vector<Real> weights(myweights,myweights+4);
-    timeToText("SixQubitEvolution2.txt",N,positions,weights,0.01);
+    timeToText("SixQubitEvolution.txt",N,positions,weights,0.01);
 }
