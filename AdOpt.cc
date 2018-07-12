@@ -105,7 +105,7 @@ std::vector<Real> gapAndEntropy(MPO Ham, SpinHalf sites){
     auto E0 = dmrg(psi0,Ham,sweeps,{"Quiet=",true});
     EnStates.at(0) = psi0;
     En.at(0) = E0;
-    for(int i=1; i<=10; i++){
+    for(int i=1; i<=20; i++){
         MPS psiI = MPS(sites);
         Real Ei = dmrg(psiI,Ham,EnStates,sweeps,{"Quiet=",true,"Weight=",20});
         EnStates.push_back(psiI);
