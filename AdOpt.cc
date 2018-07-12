@@ -20,13 +20,11 @@ MPO getHam(int N, std::vector<int> positions, std::vector<Real> weights, SpinHal
     int breakPoint = positions[2];
     auto ampo = AutoMPO(sites);
     for(int j = 1; j <= N; j++){
-        if(j != breakPoint){
-            Real couplingWeight = weights[2];
-            if(j == positions[3] or j == positions[4]){couplingWeight = weights[3];}
-            int k = j+1;
-            if(j==N){k = 1;}
-            ampo += s*couplingWeight, "Sz", j, "Sz", k;
-        }
+        Real couplingWeight = weights[2];
+        if(j == positions[3] or j == positions[4]){couplingWeight = weights[3];}
+        int k = j+1;
+        if(j==N){k = 1;}
+        ampo += s*couplingWeight, "Sz", j, "Sz", k;
         ampo += (s-1), "Sx", j;
     }
     ampo += weights[0], "Sz", spec1;
@@ -154,5 +152,5 @@ int main(int argc, char* argv[]) {
     Real myweights[] = {3,-4,-4,-2};
     std::vector<int> positions(mypositions,mypositions+5);
     std::vector<Real> weights(myweights,myweights+4);
-    timeToText("SixQubitEvolution3.txt",N,positions,weights,0.01);
+    timeToText("SixQubitEvolution.txt",N,positions,weights,0.01);
 }
