@@ -100,7 +100,7 @@ std::vector<Real> gapAndEntropy(MPO Ham, SpinHalf sites){
     auto EnStates = std::vector<MPS>(1);
     auto En = std::vector<Real>(1);
     auto sweeps = Sweeps(6);
-    sweeps.maxm() = 50,50,100,100,300,1000;
+    sweeps.maxm() = 50,50,100,100,300,900;
     sweeps.cutoff() = 1E-9;
     sweeps.noise() = 0.15;
     auto E0 = dmrg(psi0,Ham,sweeps,{"Quiet=",true});
