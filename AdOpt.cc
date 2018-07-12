@@ -145,7 +145,7 @@ void timeToText(string title,int N, std::vector<int> positions, std::vector<Real
 }
 int main(int argc, char* argv[]) {
     int N = 6;
-    int mypositions[] = {1,N/2+1,N/2,N/2+1};
+    int mypositions[] = {2,N/2+2,N/2+1,N/2+2};
     Real myweights[] = {3,-4,-4,-2};
     std::vector<int> positions(mypositions,mypositions+4);
     std::vector<Real> weights(myweights,myweights+4);
