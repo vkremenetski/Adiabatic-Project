@@ -72,7 +72,7 @@ Real getEntropy(MPS state, int bond){
     return entropy;
 }
 /*Returns the size of the largest entanglement entropy
- * across any of the bonds.
+ * across any of the bonds of a linear MPS.
  */
 Real maxEntropy(MPS state){
     Real maxEntropy = 0;
@@ -82,11 +82,32 @@ Real maxEntropy(MPS state){
     }
     return maxEntropy;
 }
+/* Returns the maximum entropy across all possible partitions of 
+ * a ring MPS. */
+Real maxEntropy2(int N, std::vector<int> p, std::vector<Real> w, SpinHalf sites, Real s){
+    Real entropy = 0;
+    for(int i = 0; i<N; i++){
+        for(int j = 0; j < 4; j++){
+            p.at(j) += i;
+            if(p.at(j) > N){p.at(j) = p.at(j) - N;}
+        }
+        MPO Ham = getHam(N,p,w,sites,s);
+        MPS psi = MPS(sites);
+        auto sweeps = Sweeps(5);
+        sweeps.maxm() = 50,50,100,100,200;
+        sweeps.cutoff() = 1E-9;
+        dmrg(psi,Ham,sweeps,"Quiet");
+        Real ent = maxEntropy(psi);
+        if(ent > entropy){entropy = ent;}
+    }
+    return entropy;
+}
+
 /*Given the Sites and the Hamiltonian, returns the
  * gap between the ground and first excited state and the
  * entropy of the ground state in that order.
  */
-std::vector<Real> gapAndEntropy(MPO Ham, SpinHalf sites){
+std::vector<Real> gapAndEntropy(int N, std::vector<int> p, std::vector<Real> w, SpinHalf sites, Real s){
     auto psi0 = MPS(sites);
     auto EnStates = std::vector<MPS>(1);
     auto En = std::vector<Real>(1);
@@ -94,6 +115,7 @@ std::vector<Real> gapAndEntropy(MPO Ham, SpinHalf sites){
     sweeps.maxm() = 50,50,100,100,300,900;
     sweeps.cutoff() = 1E-9;
     sweeps.noise() = 0.15;
+    MPO Ham = getHam(N,p,w,sites,s);
     auto E0 = dmrg(psi0,Ham,sweeps,{"Quiet=",true});
     EnStates.at(0) = psi0;
     En.at(0) = E0;
@@ -103,7 +125,7 @@ std::vector<Real> gapAndEntropy(MPO Ham, SpinHalf sites){
         EnStates.push_back(psiI);
         En.push_back(Ei);
     }
-    Real entropy = maxEntropy(psi0);
+    Real entropy = maxEntropy2(N,p,w,sites,s);
     std::sort(En.begin(),En.end());
     Real gap = En[1]-En[0];
     auto results = std::vector<Real>(2);
@@ -118,8 +140,7 @@ std::vector<Real> minGapAndEntropy(int N, std::vector<int> positions, std::vecto
     auto results = std::vector<std::vector<Real>>();
     auto sites = SpinHalf(N);
     for(Real s=0; s<=1; s+= step){
-        MPO Ham = getHam(N,positions,weights,sites,s);
-        results.push_back(gapAndEntropy(Ham,sites));
+        results.push_back(gapAndEntropy(N, positions, weights, sites, s));
     }
     std::sort(results.begin(),results.end(), helper);
     return results[0];
@@ -129,8 +150,7 @@ void timeToText(string title,int N, std::vector<int> positions, std::vector<Real
     myfile.open(title);
     auto sites = SpinHalf(N);
     for(Real s=0; s<=1; s+= step){
-        MPO Ham = getHam(N,positions,weights,sites,s);
-        auto results = gapAndEntropy(Ham,sites);
+        auto results = gapAndEntropy(N, positions, weights, sites, s);
         myfile << s << " " << results.at(0) << " " << results.at(1);
         myfile << "\n";
     }
