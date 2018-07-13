@@ -20,7 +20,7 @@ MPO getHam(int N, std::vector<int> positions, std::vector<Real> weights, SpinHal
     auto ampo = AutoMPO(sites);
     for(int j = 1; j <= N; j++){
         Real couplingWeight = weights[2];
-        if(j == positions[3] or j == positions[4]){couplingWeight = weights[3];}
+        if(j == positions[2] or j == positions[3]){couplingWeight = weights[3];}
         int k = j+1;
         if(j==N){k = 1;}
         ampo += s*couplingWeight, "Sz", j, "Sz", k;
