@@ -26,20 +26,12 @@ MPO getHam(int N, std::vector<int> positions, std::vector<Real> weights, SpinHal
         ampo += s*couplingWeight, "Sz", j, "Sz", k;
         ampo += (s-1), "Sx", j;
     }
-    ampo += weights[0], "Sz", spec1;
-    ampo += weights[1], "Sz", spec2;
+    ampo += s*weights[0], "Sz", spec1;
+    ampo += s*weights[1], "Sz", spec2;
     MPO Ham = MPO(ampo);
-    MPS psi0 = MPS(sites);
-    auto sweeps = Sweeps(5);
-    sweeps.maxm() = 50,50,100,100,200;
-    sweeps.cutoff() = 1E-9;
-    Real energy = dmrg(psi0,Ham,sweeps,"Quiet");
     return Ham;
 }
-void
-experiment(std::vector<int> thing){
-    thing[0] = 3;
-}
+
 // Converts MPS to an ITensor
 ITensor mpsToTensor(MPS matrixps){
     int N = matrixps.N();
