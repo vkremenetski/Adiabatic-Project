@@ -174,7 +174,7 @@ void qubitCountToText(string title, int UpperQubitNumber, std::vector<Real> weig
 
 
 int main(int argc, char* argv[]) {
-    int N = 12;
+    int N = 8;
     int mypositions[] = {2,N/2+2,N/2+1,N/2+2};
     Real myweights[] = {3,-4,-4,-2};
     std::vector<int> positions(mypositions,mypositions+4);
