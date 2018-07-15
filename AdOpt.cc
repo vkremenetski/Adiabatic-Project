@@ -94,7 +94,7 @@ Real maxEntropy2(int N, std::vector<int> p, std::vector<Real> w, SpinHalf sites,
         MPO Ham = getHam(N,p,w,sites,s);
         MPS psi = MPS(sites);
         auto sweeps = Sweeps(5);
-        sweeps.maxm() = 50,50,100,100,200;
+        sweeps.maxm() = 50,50,100,100,300;
         sweeps.cutoff() = 1E-9;
         sweeps.noise() = 0.15;
         dmrg(psi,Ham,sweeps,"Quiet");
