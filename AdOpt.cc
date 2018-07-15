@@ -96,6 +96,7 @@ Real maxEntropy2(int N, std::vector<int> p, std::vector<Real> w, SpinHalf sites,
         auto sweeps = Sweeps(5);
         sweeps.maxm() = 50,50,100,100,200;
         sweeps.cutoff() = 1E-9;
+        sweeps.noise() = 0.15;
         dmrg(psi,Ham,sweeps,"Quiet");
         Real ent = maxEntropy(psi);
         if(ent > entropy){entropy = ent;}
