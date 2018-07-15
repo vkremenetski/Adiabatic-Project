@@ -111,15 +111,15 @@ std::vector<Real> gapAndEntropy(int N, std::vector<int> p, std::vector<Real> w, 
     auto psi0 = MPS(sites);
     auto EnStates = std::vector<MPS>(1);
     auto En = std::vector<Real>(1);
-    auto sweeps = Sweeps(6);
-    sweeps.maxm() = 50,50,100,100,300,900;
+    auto sweeps = Sweeps(5);
+    sweeps.maxm() = 50,50,100,100,200;
     sweeps.cutoff() = 1E-9;
     sweeps.noise() = 0.15;
     MPO Ham = getHam(N,p,w,sites,s);
     auto E0 = dmrg(psi0,Ham,sweeps,{"Quiet=",true});
     EnStates.at(0) = psi0;
     En.at(0) = E0;
-    for(int i=1; i<=20; i++){
+    for(int i=1; i<=12; i++){
         MPS psiI = MPS(sites);
         Real Ei = dmrg(psiI,Ham,EnStates,sweeps,{"Quiet=",true,"Weight=",20});
         EnStates.push_back(psiI);
@@ -155,11 +155,30 @@ void timeToText(string title,int N, std::vector<int> positions, std::vector<Real
         myfile << "\n";
     }
 }
+void qubitCountToText(string title, int UpperQubitNumber, std::vector<Real> weights, Real step){
+    ofstream myfile;
+    myfile.open(title);
+    if(UpperQubitNumber >= 6){
+        for(int n = 6; n<= UpperQubitNumber; n++){
+            int mypositions[] = {1,n/2+1,n/2,n/2+1};
+            std::vector<int> positions(mypositions, mypositions+4);
+            auto results = minGapAndEntropy(n,positions,weights,step);
+            myfile << n << " " << results.at(0) << " "<< results.at(1);
+            myfile << "\n";
+            printfln("???????????????????????????????????????????????????????????????");
+            printfln("This many qubits: ",n);
+            printfln("???????????????????????????????????????????????????????????????");
+        }
+    }
+}
+
+
 int main(int argc, char* argv[]) {
-    int N = 6;
+    int N = 12;
     int mypositions[] = {2,N/2+2,N/2+1,N/2+2};
     Real myweights[] = {3,-4,-4,-2};
     std::vector<int> positions(mypositions,mypositions+4);
     std::vector<Real> weights(myweights,myweights+4);
-    timeToText("SixQubitEvolution.txt",N,positions,weights,0.01);
+    timeToText("TwelveQubEvo.txt",N,positions,weights,0.02);
+    //qubitCountToText("NQubitEvolution.txt",12,weights,0.02);
 }
