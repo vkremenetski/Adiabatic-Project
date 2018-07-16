@@ -188,5 +188,5 @@ int main(int argc, char* argv[]) {
     std::vector<int> positions(mypositions,mypositions+4);
     std::vector<Real> weights(myweights,myweights+4);
     //timeToText("EightQubEvo.txt",N,positions,weights,0.01);
-    qubitCountToText("NQubitEvolution.txt",18,weights,0.02);
+    qubitCountToText("NQubitEvolution.txt",18,weights,0.01);
 }
