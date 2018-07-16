@@ -140,7 +140,7 @@ bool helper(std::vector<Real> v1, std::vector<Real> v2){
 std::vector<Real> minGapAndEntropy(int N, std::vector<int> positions, std::vector<Real> weights, Real step){
     auto results = std::vector<std::vector<Real>>();
     auto sites = SpinHalf(N);
-    for(Real s=0; s<=1; s+= step){
+    for(Real s=0.3+step; s<=0.5; s+= step){
         results.push_back(gapAndEntropy(N, positions, weights, sites, s));
     }
     std::sort(results.begin(),results.end(), helper);
@@ -175,11 +175,11 @@ void qubitCountToText(string title, int UpperQubitNumber, std::vector<Real> weig
 
 
 int main(int argc, char* argv[]) {
-    int N = 14;
+    int N = 18;
     int mypositions[] = {1,N/2+1,N/2,N/2+1};
     Real myweights[] = {3,-4,-4,-2};
     std::vector<int> positions(mypositions,mypositions+4);
     std::vector<Real> weights(myweights,myweights+4);
-    timeToText("TwelveQubEvo.txt",N,positions,weights,0.02);
-    //qubitCountToText("NQubitEvolution.txt",12,weights,0.02);
+    //timeToText("TwelveQubEvo.txt",N,positions,weights,0.02);
+    qubitCountToText("NQubitEvolution.txt",16,weights,0.02);
 }
