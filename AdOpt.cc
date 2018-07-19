@@ -188,6 +188,6 @@ int main(int argc, char* argv[]) {
     Real myweights[] = {3,-4,-4,-2};
     std::vector<int> positions(mypositions,mypositions+4);
     std::vector<Real> weights(myweights,myweights+4);
-    timeToText("SixQubtEvolution.txt",N,positions,weights,0.01);
+    timeToText("SixQubitEvolution.txt",N,positions,weights,0.01);
     //qubitCountToText("NQubitEvolution.txt",18,weights,0.01);
 }
