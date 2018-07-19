@@ -163,6 +163,7 @@ void timeToText(string title,int N, std::vector<int> positions, std::vector<Real
         myfile << "\n";
     }
 }
+
 void qubitCountToText(string title, int UpperQubitNumber, std::vector<Real> weights, Real step){
     ofstream myfile;
     myfile.open(title);
@@ -182,11 +183,11 @@ void qubitCountToText(string title, int UpperQubitNumber, std::vector<Real> weig
 
 
 int main(int argc, char* argv[]) {
-    int N = 8;
+    int N = 6;
     int mypositions[] = {1,N/2+1,N/2,N/2+1};
     Real myweights[] = {3,-4,-4,-2};
     std::vector<int> positions(mypositions,mypositions+4);
     std::vector<Real> weights(myweights,myweights+4);
-    //timeToText("EightQubEvo.txt",N,positions,weights,0.01);
-    qubitCountToText("NQubitEvolution.txt",18,weights,0.01);
+    timeToText("SixQubtEvolution.txt",N,positions,weights,0.01);
+    //qubitCountToText("NQubitEvolution.txt",18,weights,0.01);
 }
