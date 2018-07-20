@@ -23,12 +23,40 @@ MPO getHam(int N, std::vector<int> positions, std::vector<Real> weights, SpinHal
         if(j == positions[2] or j == positions[3]){couplingWeight = weights[3];}
         int k = j+1;
         if(j==N){k = 1;}
-        ampo += s*couplingWeight, "Sz", j, "Sz", k;
+        ampo += (s/4)*couplingWeight, "Sz", j, "Sz", k;
         ampo += (s-1), "Sx", j;
     }
     ampo += s*weights[0], "Sz", spec1;
     ampo += s*weights[1], "Sz", spec2;
     MPO Ham = MPO(ampo);
+    return Ham;
+}
+//Creates a Hamiltonian as a Single ITensor (method used for troubleshooting)
+ITensor getTensorHam(int N, std::vector<int> positions, std::vector<Real> weights, SpinHalf sites, Real s){
+    int spec1 = positions[0];
+    int spec2 = positions[1];
+    ITensor Ham;
+    for(auto b: range1(N-1)){
+        Real couplingWeight = weights[2];
+        //if(b == positions[2] or b == positions[3]){couplingWeight = weights[3];}
+        //int k = b+1;
+        //if(b==N){k = 1;}
+        auto term = s*couplingWeight * sites.op("Sx", b) * sites.op("Sx",b+1);
+        //term += (s-1) * sites.op("S+",b) * sites.op("S-", b+1);
+        //term += (s-1) * sites.op("S-",b) * sites.op("S+", b+1);
+        //if(b == spec1){term += s * weights[0] * sites.op("Sz",b) * sites.op("Id",k);}
+        //else if(b == spec2){term += s * weights[1] * sites.op("Sz", b) * sites.op("Id",k);}
+        printfln("Term Rank 1: ", term.r());
+        for(auto j: range1(b-1)){term *= sites.op("Id",j);}
+        printfln("Term Rank 2: ", term.r());
+        if(b <= N-1){
+            for(auto j: range(b+2, N+1)){term *= sites.op("Id",j);}
+        }
+        printfln("Term Rank 3: ", term.r());
+        printfln("Rank Ham: ", Ham.r());
+        Ham += term;
+        printfln("Just finished: ", b);
+    }
     return Ham;
 }
 
@@ -38,6 +66,14 @@ ITensor mpsToTensor(MPS matrixps){
     ITensor result = ITensor(1);
     for(int i = 1; i <= N; i++){
         result = result * matrixps.A(i);
+    }
+    return result;
+}
+ITensor mpoToTensor(MPO operator1){
+    int N = operator1.N();
+    ITensor result = ITensor(1);
+    for(int i = 1; i<= N; i++){
+        result = result * operator1.A(i);
     }
     return result;
 }
@@ -188,6 +224,23 @@ int main(int argc, char* argv[]) {
     Real myweights[] = {3,-4,-4,-2};
     std::vector<int> positions(mypositions,mypositions+4);
     std::vector<Real> weights(myweights,myweights+4);
+    SpinHalf spins = SpinHalf(N);
     timeToText("SixQubitEvolution.txt",N,positions,weights,0.01);
     //qubitCountToText("NQubitEvolution.txt",18,weights,0.01);
+    /*for(Real s = 0.75; s<= 1; s+=0.01){
+        MPO Ham = getHam(N, positions, weights, spins, s);
+        ITensor Hamiltonian = mpoToTensor(Ham);
+        ITensor U, d;
+        diagHermitian(Hamiltonian, U, d);
+        IndexSet sett = d.inds();
+        Index ind1 = sett.index(1);
+        Index ind2 = sett.index(2);
+        auto energies = std::vector<Real>();
+        for(int i = 1; i<= ind1.m(); i++){
+            energies.push_back(d.real(ind1(i),ind2(i)));
+        }
+        std::sort(energies.begin(),energies.end());
+        printfln("Gap: ", energies.at(1)-energies.at(0));
+    }*/
+
 }
