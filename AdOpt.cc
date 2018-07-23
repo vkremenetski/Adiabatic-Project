@@ -179,7 +179,7 @@ bool helper2(std::vector<Real> v1, std::vector<Real> v2){
 std::vector<Real> minGapAndEntropy(int N, std::vector<int> positions, std::vector<Real> weights, Real step){
     auto results = std::vector<std::vector<Real>>();
     auto sites = SpinHalf(N);
-    for(Real s=0.5; s<=1.0; s+= step){
+    for(Real s=0; s<=1.0; s+= step){
         results.push_back(gapAndEntropy(N, positions, weights, sites, s));
     }
     std::sort(results.begin(),results.end(), helper1);
