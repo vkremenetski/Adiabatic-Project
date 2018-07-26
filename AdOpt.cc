@@ -14,6 +14,24 @@ using namespace itensor;
  * weights is a vector containing the relevant weights. Namely:
  *   <First Special Qubit Weight, Second..., Weight of Normal Couplings, Weight of Special...>
  */
+
+//Diagonalizes an MPO to find the gap.
+Real gapEDMPO(MPO Ham) {
+  ITensor prod(1.0);
+
+  for(int i = 1; i <= Ham.N(); i++) {
+    prod *= Ham.A(i);
+  }
+
+  ITensor U, D;
+
+  diagHermitian(prod, U, D);
+
+  Index ci = commonIndex(U, D);
+
+  return (D.real(ci(ci.m() - 1), prime(ci)(ci.m() - 1)) - D.real(ci(ci.m()), prime(ci)(ci.m())));
+}
+
 MPO getHam(int N, std::vector<int> positions, std::vector<Real> weights, SpinHalf sites, Real s){
     int spec1 = positions[0];
     int spec2 = positions[1];
@@ -23,14 +41,19 @@ MPO getHam(int N, std::vector<int> positions, std::vector<Real> weights, SpinHal
         if(j == positions[2] or j == positions[3]){couplingWeight = weights[3];}
         int k = j+1;
         if(j==N){k = 1;}
-        ampo += s*couplingWeight, "Sz", j, "Sz", k;
-        ampo += (s-1), "Sx", j;
+        ampo += s*couplingWeight*4, "Sz", j, "Sz", k;
+        ampo += (s-1)*2, "Sx", j;
     }
-    ampo += s*weights[0], "Sz", spec1;
-    ampo += s*weights[1], "Sz", spec2;
+    ampo += s*weights[0]*2, "Sz", spec1;
+    ampo += s*weights[1]*2, "Sz", spec2;
+    Print(ampo);
     MPO Ham = MPO(ampo);
+
+    Print(gapEDMPO(Ham));
+
     return Ham;
 }
+
 //Creates a Hamiltonian as a Single ITensor (method used for troubleshooting)
 ITensor getTensorHam(int N, std::vector<int> positions, std::vector<Real> weights, SpinHalf sites, Real s){
     int spec1 = positions[0];
@@ -129,10 +152,10 @@ Real maxEntropy2(int N, std::vector<int> p, std::vector<Real> w, SpinHalf sites,
         }
         MPO Ham = getHam(N,p,w,sites,s);
         MPS psi = MPS(sites);
-        auto sweeps = Sweeps(5);
+        auto sweeps = Sweeps(13);
         sweeps.maxm() = 50,50,100,100,300;
-        sweeps.cutoff() = 1E-9;
-        sweeps.noise() = 0.2;
+        sweeps.noise() = 3e-1, 1e-1, 3e-2, 1e-2, 3e-3, 1e-3, 3e-4, 1e-4, 3e-5, 1e-5, 3e-6, 1e-6, 0;
+        sweeps.cutoff() = 1E-10;
         dmrg(psi,Ham,sweeps,"Quiet");
         Real ent = maxEntropy(psi);
         if(ent > entropy){entropy = ent;}
@@ -148,10 +171,10 @@ std::vector<Real> gapAndEntropy(int N, std::vector<int> p, std::vector<Real> w, 
     auto psi0 = MPS(sites);
     auto EnStates = std::vector<MPS>(1);
     auto En = std::vector<Real>(1);
-    auto sweeps = Sweeps(5);
-    sweeps.maxm() = 50,50,100,100,200;
-    sweeps.cutoff() = 1E-9;
-    sweeps.noise() = 0.15;
+    auto sweeps = Sweeps(13);
+    sweeps.maxm() = 50,50,100,100,200,300;
+    sweeps.cutoff() = 1E-10;
+    sweeps.noise() = 3e-1, 1e-1, 3e-2, 1e-2, 3e-3, 1e-3, 3e-4, 1e-4, 3e-5, 1e-5, 3e-6, 1e-6, 0;
     MPO Ham = getHam(N,p,w,sites,s);
     auto E0 = dmrg(psi0,Ham,sweeps,{"Quiet=",true});
     EnStates.at(0) = psi0;
@@ -193,7 +216,7 @@ void timeToText(string title,int N, std::vector<int> positions, std::vector<Real
     ofstream myfile;
     myfile.open(title);
     auto sites = SpinHalf(N);
-    for(Real s=0; s<=1; s+= step){
+    for(Real s=.684; s<=.688; s+= step){
         auto results = gapAndEntropy(N, positions, weights, sites, s);
         myfile << s << " " << results.at(0) << " " << results.at(1);
         myfile << "\n";
@@ -225,8 +248,8 @@ int main(int argc, char* argv[]) {
     std::vector<int> positions(mypositions,mypositions+4);
     std::vector<Real> weights(myweights,myweights+4);
     SpinHalf spins = SpinHalf(N);
-    //timeToText("SixQubitEvolution.txt",N,positions,weights,0.01);
-    qubitCountToText("NQubitEvolution.txt",16,weights,0.02);
+    timeToText("SixQubitEvolution.txt",N,positions,weights,0.002);
+    //qubitCountToText("NQubitEvolution.txt",16,weights,0.02);
     /*for(Real s = 0.75; s<= 1; s+=0.01){
         MPO Ham = getHam(N, positions, weights, spins, s);
         ITensor Hamiltonian = mpoToTensor(Ham);
