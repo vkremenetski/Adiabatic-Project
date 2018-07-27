@@ -212,17 +212,20 @@ std::vector<Real> minGapAndEntropy(int N, std::vector<int> positions, std::vecto
     output.push_back(results[0][1]);
     return output;
 }
+//Creates title.txt file listing the entropy and energy gap over time
 void timeToText(string title,int N, std::vector<int> positions, std::vector<Real> weights, Real step){
     ofstream myfile;
     myfile.open(title);
     auto sites = SpinHalf(N);
-    for(Real s=.684; s<=.688; s+= step){
+    for(Real s=0; s<=1; s+= step){
         auto results = gapAndEntropy(N, positions, weights, sites, s);
         myfile << s << " " << results.at(0) << " " << results.at(1);
         myfile << "\n";
     }
 }
 
+//creates title.txt file listing the maximum entropy and minimum gap as qubit number increases
+//
 void qubitCountToText(string title, int UpperQubitNumber, std::vector<Real> weights, Real step){
     ofstream myfile;
     myfile.open(title);
@@ -248,7 +251,7 @@ int main(int argc, char* argv[]) {
     std::vector<int> positions(mypositions,mypositions+4);
     std::vector<Real> weights(myweights,myweights+4);
     SpinHalf spins = SpinHalf(N);
-    timeToText("SixQubitEvolution.txt",N,positions,weights,0.002);
+    timeToText("SixQubitEvolution.txt",N,positions,weights,0.01);
     //qubitCountToText("NQubitEvolution.txt",16,weights,0.02);
     /*for(Real s = 0.75; s<= 1; s+=0.01){
         MPO Ham = getHam(N, positions, weights, spins, s);
