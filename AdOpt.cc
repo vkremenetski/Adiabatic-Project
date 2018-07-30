@@ -46,11 +46,9 @@ MPO getHam(int N, std::vector<int> positions, std::vector<Real> weights, SpinHal
     }
     ampo += s*weights[0]*2, "Sz", spec1;
     ampo += s*weights[1]*2, "Sz", spec2;
-    Print(ampo);
+    //Print(ampo);
     MPO Ham = MPO(ampo);
-
-    Print(gapEDMPO(Ham));
-
+    //Print(gapEDMPO(Ham));
     return Ham;
 }
 
@@ -202,7 +200,7 @@ bool helper2(std::vector<Real> v1, std::vector<Real> v2){
 std::vector<Real> minGapAndEntropy(int N, std::vector<int> positions, std::vector<Real> weights, Real step){
     auto results = std::vector<std::vector<Real>>();
     auto sites = SpinHalf(N);
-    for(Real s=0; s<=1.0; s+= step){
+    for(Real s=0.5; s<=0.8; s+= step){
         results.push_back(gapAndEntropy(N, positions, weights, sites, s));
     }
     std::sort(results.begin(),results.end(), helper1);
@@ -217,7 +215,7 @@ void timeToText(string title,int N, std::vector<int> positions, std::vector<Real
     ofstream myfile;
     myfile.open(title);
     auto sites = SpinHalf(N);
-    for(Real s=0; s<=1; s+= step){
+    for(Real s=0.5; s<=0.8; s+= step){
         auto results = gapAndEntropy(N, positions, weights, sites, s);
         myfile << s << " " << results.at(0) << " " << results.at(1);
         myfile << "\n";
@@ -229,8 +227,8 @@ void timeToText(string title,int N, std::vector<int> positions, std::vector<Real
 void qubitCountToText(string title, int UpperQubitNumber, std::vector<Real> weights, Real step){
     ofstream myfile;
     myfile.open(title);
-    if(UpperQubitNumber >= 6){
-        for(int n = 6; n<= UpperQubitNumber; n++){
+    if(UpperQubitNumber >= 4){
+        for(int n = 4; n<= UpperQubitNumber; n++){
             int mypositions[] = {1,n/2+1,n/2,n/2+1};
             std::vector<int> positions(mypositions, mypositions+4);
             auto results = minGapAndEntropy(n,positions,weights,step);
@@ -245,14 +243,14 @@ void qubitCountToText(string title, int UpperQubitNumber, std::vector<Real> weig
 
 
 int main(int argc, char* argv[]) {
-    int N = 6;
+    int N = 7;
     int mypositions[] = {1,N/2+1,N/2,N/2+1};
     Real myweights[] = {0.75,-1,-1,-0.5};
     std::vector<int> positions(mypositions,mypositions+4);
     std::vector<Real> weights(myweights,myweights+4);
     SpinHalf spins = SpinHalf(N);
-    timeToText("SixQubitEvolution.txt",N,positions,weights,0.01);
-    //qubitCountToText("NQubitEvolution.txt",16,weights,0.02);
+    timeToText("SevenQubitEvolution2.txt",N,positions,weights,0.002);
+    //qubitCountToText("NQubitEvolution.txt",16,weights,0.01);
     /*for(Real s = 0.75; s<= 1; s+=0.01){
         MPO Ham = getHam(N, positions, weights, spins, s);
         ITensor Hamiltonian = mpoToTensor(Ham);
