@@ -243,13 +243,13 @@ void qubitCountToText(string title, int UpperQubitNumber, std::vector<Real> weig
 
 
 int main(int argc, char* argv[]) {
-    int N = 10;
+    int N = 9;
     int mypositions[] = {1,N/2+1,N/2,N/2+1};
     Real myweights[] = {0.75,-1,-1,-0.5};
     std::vector<int> positions(mypositions,mypositions+4);
     std::vector<Real> weights(myweights,myweights+4);
     SpinHalf spins = SpinHalf(N);
-    timeToText("TenQubitEvolution2.txt",N,positions,weights,0.002);
+    timeToText("NineQubitEvolution2.txt",N,positions,weights,0.002);
     //qubitCountToText("NQubitEvolution.txt",16,weights,0.01);
     /*for(Real s = 0.75; s<= 1; s+=0.01){
         MPO Ham = getHam(N, positions, weights, spins, s);
