@@ -153,7 +153,7 @@ Real maxEntropy2(int N, std::vector<int> p, std::vector<Real> w, SpinHalf sites,
         auto sweeps = Sweeps(13);
         sweeps.maxm() = 50,50,100,100,300;
         sweeps.noise() = 3e-1, 1e-1, 3e-2, 1e-2, 3e-3, 1e-3, 3e-4, 1e-4, 3e-5, 1e-5, 3e-6, 1e-6, 0;
-        sweeps.cutoff() = 1E-10;
+        sweeps.cutoff() = 1E-11;
         dmrg(psi,Ham,sweeps,"Quiet");
         Real ent = maxEntropy(psi);
         if(ent > entropy){entropy = ent;}
@@ -171,7 +171,7 @@ std::vector<Real> gapAndEntropy(int N, std::vector<int> p, std::vector<Real> w, 
     auto En = std::vector<Real>(1);
     auto sweeps = Sweeps(13);
     sweeps.maxm() = 50,50,100,100,200,300;
-    sweeps.cutoff() = 1E-10;
+    sweeps.cutoff() = 1E-11;
     sweeps.noise() = 3e-1, 1e-1, 3e-2, 1e-2, 3e-3, 1e-3, 3e-4, 1e-4, 3e-5, 1e-5, 3e-6, 1e-6, 0;
     MPO Ham = getHam(N,p,w,sites,s);
     auto E0 = dmrg(psi0,Ham,sweeps,{"Quiet=",true});
@@ -249,7 +249,7 @@ int main(int argc, char* argv[]) {
     std::vector<int> positions(mypositions,mypositions+4);
     std::vector<Real> weights(myweights,myweights+4);
     SpinHalf spins = SpinHalf(N);
-    timeToText("NineQubitEvolution2.txt",N,positions,weights,0.002);
+    timeToText("TenQubitEvolution2.txt",N,positions,weights,0.002);
     //qubitCountToText("NQubitEvolution.txt",16,weights,0.01);
     /*for(Real s = 0.75; s<= 1; s+=0.01){
         MPO Ham = getHam(N, positions, weights, spins, s);
