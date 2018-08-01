@@ -150,9 +150,9 @@ Real maxEntropy2(int N, std::vector<int> p, std::vector<Real> w, SpinHalf sites,
         }
         MPO Ham = getHam(N,p,w,sites,s);
         MPS psi = MPS(sites);
-        auto sweeps = Sweeps(17);
+        auto sweeps = Sweeps(19);
         sweeps.maxm() = 50,50,100,100,300;
-        sweeps.noise() = 3e-1, 1e-1, 3e-2, 1e-2, 3e-3, 1e-3, 3e-4, 1e-4, 3e-5, 1e-5, 3e-6, 1e-6, 3e-7, 1e-7, 3e-8, 1e-8, 0;
+        sweeps.noise() = 3e-1, 1e-1, 3e-2, 1e-2, 3e-3, 1e-3, 3e-4, 1e-4, 3e-5, 1e-5, 3e-6, 1e-6, 3e-7, 1e-7, 3e-8, 1e-8, 3e-9, 1e-9, 0;
         sweeps.cutoff() = 1E-10;
         dmrg(psi,Ham,sweeps,"Quiet");
         Real ent = maxEntropy(psi);
@@ -169,10 +169,10 @@ std::vector<Real> gapAndEntropy(int N, std::vector<int> p, std::vector<Real> w, 
     auto psi0 = MPS(sites);
     auto EnStates = std::vector<MPS>(1);
     auto En = std::vector<Real>(1);
-    auto sweeps = Sweeps(17);
+    auto sweeps = Sweeps(19);
     sweeps.maxm() = 50,50,100,100,200,300;
     sweeps.cutoff() = 1E-10;
-    sweeps.noise() = 3e-1, 1e-1, 3e-2, 1e-2, 3e-3, 1e-3, 3e-4, 1e-4, 3e-5, 1e-5, 3e-6, 1e-6, 3e-7, 1e-7, 3e-8, 1e-8, 0;
+    sweeps.noise() = 3e-1, 1e-1, 3e-2, 1e-2, 3e-3, 1e-3, 3e-4, 1e-4, 3e-5, 1e-5, 3e-6, 1e-6, 3e-7, 1e-7, 3e-8, 1e-8, 3e-9, 1e-9, 0;
     MPO Ham = getHam(N,p,w,sites,s);
     auto E0 = dmrg(psi0,Ham,sweeps,{"Quiet=",true});
     EnStates.at(0) = psi0;
