@@ -150,10 +150,10 @@ Real maxEntropy2(int N, std::vector<int> p, std::vector<Real> w, SpinHalf sites,
         }
         MPO Ham = getHam(N,p,w,sites,s);
         MPS psi = MPS(sites);
-        auto sweeps = Sweeps(13);
+        auto sweeps = Sweeps(15);
         sweeps.maxm() = 50,50,100,100,300;
-        sweeps.noise() = 3e-1, 1e-1, 3e-2, 1e-2, 3e-3, 1e-3, 3e-4, 1e-4, 3e-5, 1e-5, 3e-6, 1e-6, 0;
-        sweeps.cutoff() = 1E-11;
+        sweeps.noise() = 3e-1, 1e-1, 3e-2, 1e-2, 3e-3, 1e-3, 3e-4, 1e-4, 3e-5, 1e-5, 3e-6, 1e-6, 3e-7, 1e-7, 0;
+        sweeps.cutoff() = 1E-10;
         dmrg(psi,Ham,sweeps,"Quiet");
         Real ent = maxEntropy(psi);
         if(ent > entropy){entropy = ent;}
@@ -169,10 +169,10 @@ std::vector<Real> gapAndEntropy(int N, std::vector<int> p, std::vector<Real> w, 
     auto psi0 = MPS(sites);
     auto EnStates = std::vector<MPS>(1);
     auto En = std::vector<Real>(1);
-    auto sweeps = Sweeps(13);
+    auto sweeps = Sweeps(15);
     sweeps.maxm() = 50,50,100,100,200,300;
-    sweeps.cutoff() = 1E-11;
-    sweeps.noise() = 3e-1, 1e-1, 3e-2, 1e-2, 3e-3, 1e-3, 3e-4, 1e-4, 3e-5, 1e-5, 3e-6, 1e-6, 0;
+    sweeps.cutoff() = 1E-10;
+    sweeps.noise() = 3e-1, 1e-1, 3e-2, 1e-2, 3e-3, 1e-3, 3e-4, 1e-4, 3e-5, 1e-5, 3e-6, 1e-6, 3e-7, 1e-7, 0;
     MPO Ham = getHam(N,p,w,sites,s);
     auto E0 = dmrg(psi0,Ham,sweeps,{"Quiet=",true});
     EnStates.at(0) = psi0;
@@ -243,13 +243,13 @@ void qubitCountToText(string title, int UpperQubitNumber, std::vector<Real> weig
 
 
 int main(int argc, char* argv[]) {
-    int N = 9;
+    int N = 10;
     int mypositions[] = {1,N/2+1,N/2,N/2+1};
     Real myweights[] = {0.75,-1,-1,-0.5};
     std::vector<int> positions(mypositions,mypositions+4);
     std::vector<Real> weights(myweights,myweights+4);
     SpinHalf spins = SpinHalf(N);
-    timeToText("NineQubitEvolution2.txt",N,positions,weights,0.002);
+    timeToText("TenQubitEvolution2.txt",N,positions,weights,0.002);
     //qubitCountToText("NQubitEvolution.txt",16,weights,0.01);
     /*for(Real s = 0.75; s<= 1; s+=0.01){
         MPO Ham = getHam(N, positions, weights, spins, s);
