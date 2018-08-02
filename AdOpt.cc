@@ -249,7 +249,7 @@ void overlapToText(string title, Real time1, Real time2, int N, std::vector<int>
     auto psi1 = MPS(sites);
     auto psi2 = MPS(sites);
     auto sweeps = Sweeps(25);
-    sweeps.maxm() = 50,50,100,100,200,300,500;
+    sweeps.maxm() = 50,50,100,100,200,300,500,1000;
     sweeps.cutoff() = 1E-12;
     sweeps.noise() = 3e-1, 1e-1, 3e-2, 1e-2, 3e-3, 1e-3, 3e-4, 1e-4, 3e-5, 1e-5, 3e-6, 1e-6, 3e-7, 1e-7, 3e-8, 1e-8, 3e-9, 1e-9, 3e-10, 1e-10, 3e-11, 1e-11, 3e-12, 1e-12, 0;
     MPO Ham1 = getHam(N,positions, weights, sites, time1);
