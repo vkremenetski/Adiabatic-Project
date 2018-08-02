@@ -240,16 +240,42 @@ void qubitCountToText(string title, int UpperQubitNumber, std::vector<Real> weig
         }
     }
 }
-
+//Finds the ground states of the Hamiltonian at time1 and time2, then prints out the overlap intermediate ground states have with these two.
+//
+void overlapToText(string title, Real time1, Real time2, int N, std::vector<int> positions, std::vector<Real> weights, Real step){
+    ofstream myfile;
+    myfile.open(title);
+    auto sites = SpinHalf(N);
+    auto psi1 = MPS(sites);
+    auto psi2 = MPS(sites);
+    auto sweeps = Sweeps(21);
+    sweeps.maxm() = 50,50,100,100,200,300;
+    sweeps.cutoff() = 1E-10;
+    sweeps.noise() = 3e-1, 1e-1, 3e-2, 1e-2, 3e-3, 1e-3, 3e-4, 1e-4, 3e-5, 1e-5, 3e-6, 1e-6, 3e-7, 1e-7, 3e-8, 1e-8, 3e-9, 1e-9, 3e-10, 1e-10, 0;
+    MPO Ham1 = getHam(N,positions, weights, sites, time1);
+    MPO Ham2 = getHam(N,positions, weights, sites, time2);
+    dmrg(psi1, Ham1, sweeps, "Quiet");
+    dmrg(psi2, Ham2, sweeps, "Quiet");
+    for(Real s = time1; s<= time2; s += step){
+        auto middlePsi = MPS(sites);
+        MPO middleHam = getHam(N,positions,weights,sites,s);
+        dmrg(middlePsi, middleHam, sweeps, "Quiet");
+        auto innProd1 = overlap(middlePsi, psi1);
+        auto innProd2 = overlap(middlePsi, psi2);
+        myfile << s << " " << innProd1 << " " << innProd2;
+        myfile << "\n";
+    }
+}
 
 int main(int argc, char* argv[]) {
-    int N = 14;
+    int N = 10;
     int mypositions[] = {1,N/2+1,N/2,N/2+1};
     Real myweights[] = {0.75,-1,-1,-0.5};
     std::vector<int> positions(mypositions,mypositions+4);
     std::vector<Real> weights(myweights,myweights+4);
     SpinHalf spins = SpinHalf(N);
-    timeToText("FourteenQubitEvolution2.txt",N,positions,weights,0.0002);
+    overlapToText("Overlap10q.txt", 0.66, 0.70, N, positions, weights, 0.001);
+    //timeToText("FourteenQubitEvolution2.txt",N,positions,weights,0.0002);
     //qubitCountToText("NQubitEvolution.txt",16,weights,0.01);
     /*for(Real s = 0.75; s<= 1; s+=0.01){
         MPO Ham = getHam(N, positions, weights, spins, s);
