@@ -143,7 +143,7 @@ Real maxEntropy(MPS state){
  * a ring MPS. */
 Real maxEntropy2(int N, std::vector<int> p, std::vector<Real> w, SpinHalf sites, Real s){
     Real entropy = 0;
-    for(int i = 0; i<1; i++){
+    for(int i = 0; i<N; i++){
         for(int j = 0; j < 4; j++){
             p.at(j) += i;
             if(p.at(j) > N){p.at(j) = p.at(j) - N;}
@@ -215,7 +215,7 @@ void timeToText(string title,int N, std::vector<int> positions, std::vector<Real
     ofstream myfile;
     myfile.open(title);
     auto sites = SpinHalf(N);
-    for(Real s=0; s<=1; s+= step){
+    for(Real s=0.67; s<=0.69; s+= step){
         auto results = gapAndEntropy(N, positions, weights, sites, s);
         myfile << s << " " << results.at(0) << " " << results.at(1);
         myfile << "\n";
@@ -243,13 +243,13 @@ void qubitCountToText(string title, int UpperQubitNumber, std::vector<Real> weig
 
 
 int main(int argc, char* argv[]) {
-    int N = 8;
+    int N = 14;
     int mypositions[] = {1,N/2+1,N/2,N/2+1};
     Real myweights[] = {0.75,-1,-1,-0.5};
     std::vector<int> positions(mypositions,mypositions+4);
     std::vector<Real> weights(myweights,myweights+4);
     SpinHalf spins = SpinHalf(N);
-    timeToText("EightQubitEvolution2.txt",N,positions,weights,0.01);
+    timeToText("FourteenQubitEvolution2.txt",N,positions,weights,0.0002);
     //qubitCountToText("NQubitEvolution.txt",16,weights,0.01);
     /*for(Real s = 0.75; s<= 1; s+=0.01){
         MPO Ham = getHam(N, positions, weights, spins, s);
