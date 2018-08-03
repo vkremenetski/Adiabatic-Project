@@ -267,8 +267,9 @@ void overlapToText(string title, Real time1, Real time2, int N, std::vector<int>
         auto complexInProd2 = overlapC(middlePsi, psi2);
         auto approximatePsi = (complexInProd1 * psi1).plusEq(complexInProd2*psi2);
         normalize(approximatePsi);
-        Real middleEntropy = maxEntropy(approximatePsi);
-        myfile << " " << middleEntropy;
+        Real middleEntropy = maxEntropy(middlePsi);
+        Real approximateEntropy = maxEntropy(approximatePsi);
+        myfile << " " << middleEntropy << " " << approximateEntropy;
         myfile << "\n";
     }
     /*Real leftEntropy = maxEntropy2(N,positions,weights,sites,time1);
