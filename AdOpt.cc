@@ -265,16 +265,20 @@ void overlapToText(string title, Real time1, Real time2, int N, std::vector<int>
         myfile << s << " " << innProd1 << " " << innProd2;
         myfile << "\n";
     }
+    Real leftEntropy = maxEntropy2(N,positions,weights,sites,time1);
+    Real rightEntropy = maxEntropy2(N,positions,weights,sites,time2);
+    printfln("Left-Hand Entropy: ", leftEntropy);
+    printfln("Right-Hand Entropy: ", rightEntropy);
 }
 
 int main(int argc, char* argv[]) {
-    int N = 10;
+    int N = 8;
     int mypositions[] = {1,N/2+1,N/2,N/2+1};
     Real myweights[] = {0.75,-1,-1,-0.5};
     std::vector<int> positions(mypositions,mypositions+4);
     std::vector<Real> weights(myweights,myweights+4);
     SpinHalf spins = SpinHalf(N);
-    overlapToText("Overlap10q.txt", 0.65, 0.75, N, positions, weights, 0.001);
+    overlapToText("Overlap8q.txt", 0.67, 0.69, N, positions, weights, 0.0001);
     //timeToText("FourteenQubitEvolution2.txt",N,positions,weights,0.0002);
     //qubitCountToText("NQubitEvolution.txt",16,weights,0.01);
     /*for(Real s = 0.75; s<= 1; s+=0.01){
