@@ -259,6 +259,7 @@ void overlapToText(string title, Real time1, Real time2, int N, std::vector<int>
     for(Real s = time1; s<= time2; s += step){
         auto middlePsi = MPS(sites);
         MPO middleHam = getHam(N,positions,weights,sites,s);
+        Real middleEntropy = maxEntropy2(N,positions,weights,sites,s);
         dmrg(middlePsi, middleHam, sweeps, "Quiet");
         auto innProd1 = overlap(middlePsi, psi1);
         auto innProd2 = overlap(middlePsi, psi2);
@@ -267,7 +268,7 @@ void overlapToText(string title, Real time1, Real time2, int N, std::vector<int>
         auto complexInProd2 = overlapC(middlePsi, psi2);
         auto approximatePsi = (complexInProd1 * psi1).plusEq(complexInProd2*psi2);
         normalize(approximatePsi);
-        Real middleEntropy = maxEntropy(middlePsi);
+        //Real middleEntropy = maxEntropy(middlePsi);
         Real approximateEntropy = maxEntropy(approximatePsi);
         myfile << " " << middleEntropy << " " << approximateEntropy;
         myfile << "\n";
