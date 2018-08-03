@@ -263,22 +263,28 @@ void overlapToText(string title, Real time1, Real time2, int N, std::vector<int>
         auto innProd1 = overlap(middlePsi, psi1);
         auto innProd2 = overlap(middlePsi, psi2);
         myfile << s << " " << innProd1 << " " << innProd2;
+        auto complexInProd1 = overlapC(middlePsi, psi1);
+        auto complexInProd2 = overlapC(middlePsi, psi2);
+        auto approximatePsi = (complexInProd1 * psi1).plusEq(complexInProd2*psi2);
+        normalize(approximatePsi);
+        Real middleEntropy = maxEntropy(approximatePsi);
+        myfile << " " << middleEntropy;
         myfile << "\n";
     }
-    Real leftEntropy = maxEntropy2(N,positions,weights,sites,time1);
+    /*Real leftEntropy = maxEntropy2(N,positions,weights,sites,time1);
     Real rightEntropy = maxEntropy2(N,positions,weights,sites,time2);
     printfln("Left-Hand Entropy: ", leftEntropy);
-    printfln("Right-Hand Entropy: ", rightEntropy);
+    printfln("Right-Hand Entropy: ", rightEntropy);*/
 }
 
 int main(int argc, char* argv[]) {
-    int N = 8;
+    int N = 10;
     int mypositions[] = {1,N/2+1,N/2,N/2+1};
     Real myweights[] = {0.75,-1,-1,-0.5};
     std::vector<int> positions(mypositions,mypositions+4);
     std::vector<Real> weights(myweights,myweights+4);
     SpinHalf spins = SpinHalf(N);
-    overlapToText("Overlap8q.txt", 0.65, 0.75, N, positions, weights, 0.001);
+    overlapToText("Overlap10q.txt", 0.65, 0.75, N, positions, weights, 0.001);
     //timeToText("FourteenQubitEvolution2.txt",N,positions,weights,0.0002);
     //qubitCountToText("NQubitEvolution.txt",16,weights,0.01);
     /*for(Real s = 0.75; s<= 1; s+=0.01){
