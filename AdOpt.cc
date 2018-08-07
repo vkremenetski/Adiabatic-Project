@@ -280,14 +280,14 @@ void overlapToText(string title, Real time1, Real time2, int N, std::vector<int>
 }
 
 int main(int argc, char* argv[]) {
-    int N = 4;
+    int N = 5;
     int mypositions[] = {1,N/2+1,N/2,N/2+1};
     Real myweights[] = {0.75,-1,-1,-0.5};
     std::vector<int> positions(mypositions,mypositions+4);
     std::vector<Real> weights(myweights,myweights+4);
     SpinHalf spins = SpinHalf(N);
     //overlapToText("Overlap10q.txt", 0.65, 0.75, N, positions, weights, 0.001);
-    timeToText("FourQubitEvolution2.txt",N,positions,weights,0.005);
+    timeToText("FiveQubitEvolution2.txt",N,positions,weights,0.005);
     //qubitCountToText("NQubitEvolution.txt",16,weights,0.01);
     /*for(Real s = 0.75; s<= 1; s+=0.01){
         MPO Ham = getHam(N, positions, weights, spins, s);
