@@ -150,10 +150,10 @@ Real maxEntropy2(int N, std::vector<int> p, std::vector<Real> w, SpinHalf sites,
         }
         MPO Ham = getHam(N,p,w,sites,s);
         MPS psi = MPS(sites);
-        auto sweeps = Sweeps(21);
-        sweeps.maxm() = 50,50,100,100,300;
-        sweeps.noise() = 3e-1, 1e-1, 3e-2, 1e-2, 3e-3, 1e-3, 3e-4, 1e-4, 3e-5, 1e-5, 3e-6, 1e-6, 3e-7, 1e-7, 3e-8, 1e-8, 3e-9, 1e-9, 3e-10, 1e-10, 0;
-        sweeps.cutoff() = 1E-10;
+        auto sweeps = Sweeps(22);
+        sweeps.maxm() = 50,50,100,100,400;
+        sweeps.noise() = 3e-1, 1e-1, 3e-2, 1e-2, 3e-3, 1e-3, 3e-4, 1e-4, 3e-5, 1e-5, 3e-6, 1e-6, 3e-7, 1e-7, 3e-8, 1e-8, 3e-9, 1e-9, 3e-10, 1e-10, 3e-11, 0;
+        sweeps.cutoff() = 1E-11;
         dmrg(psi,Ham,sweeps,"Quiet");
         Real ent = maxEntropy(psi);
         if(ent > entropy){entropy = ent;}
@@ -169,10 +169,10 @@ std::vector<Real> gapAndEntropy(int N, std::vector<int> p, std::vector<Real> w, 
     auto psi0 = MPS(sites);
     auto EnStates = std::vector<MPS>(1);
     auto En = std::vector<Real>(1);
-    auto sweeps = Sweeps(21);
-    sweeps.maxm() = 50,50,100,100,200,300;
-    sweeps.cutoff() = 1E-10;
-    sweeps.noise() = 3e-1, 1e-1, 3e-2, 1e-2, 3e-3, 1e-3, 3e-4, 1e-4, 3e-5, 1e-5, 3e-6, 1e-6, 3e-7, 1e-7, 3e-8, 1e-8, 3e-9, 1e-9, 3e-10, 1e-10, 0;
+    auto sweeps = Sweeps(22);
+    sweeps.maxm() = 50,50,100,100,200,400;
+    sweeps.cutoff() = 1E-11;
+    sweeps.noise() = 3e-1, 1e-1, 3e-2, 1e-2, 3e-3, 1e-3, 3e-4, 1e-4, 3e-5, 1e-5, 3e-6, 1e-6, 3e-7, 1e-7, 3e-8, 1e-8, 3e-9, 1e-9, 3e-10, 1e-10, 3e-11, 0;
     MPO Ham = getHam(N,p,w,sites,s);
     auto E0 = dmrg(psi0,Ham,sweeps,{"Quiet=",true});
     EnStates.at(0) = psi0;
@@ -215,7 +215,7 @@ void timeToText(string title,int N, std::vector<int> positions, std::vector<Real
     ofstream myfile;
     myfile.open(title);
     auto sites = SpinHalf(N);
-    for(Real s=0; s<1+step; s+= step){
+    for(Real s=0.683; s<0.686+step; s+= step){
         auto results = gapAndEntropy(N, positions, weights, sites, s);
         myfile << s << " " << results.at(0) << " " << results.at(1);
         myfile << "\n";
@@ -259,7 +259,7 @@ void overlapToText(string title, Real time1, Real time2, int N, std::vector<int>
     for(Real s = time1; s<= time2; s += step){
         auto middlePsi = MPS(sites);
         MPO middleHam = getHam(N,positions,weights,sites,s);
-        Real middleEntropy = maxEntropy2(N,positions,weights,sites,s);
+        //Real middleEntropy = maxEntropy2(N,positions,weights,sites,s);
         dmrg(middlePsi, middleHam, sweeps, "Quiet");
         auto innProd1 = overlap(middlePsi, psi1);
         auto innProd2 = overlap(middlePsi, psi2);
@@ -269,8 +269,8 @@ void overlapToText(string title, Real time1, Real time2, int N, std::vector<int>
         auto approximatePsi = (complexInProd1 * psi1).plusEq(complexInProd2*psi2);
         normalize(approximatePsi);
         //Real middleEntropy = maxEntropy(middlePsi);
-        Real approximateEntropy = maxEntropy(approximatePsi);
-        myfile << " " << middleEntropy << " " << approximateEntropy;
+        //Real approximateEntropy = maxEntropy(approximatePsi);
+        //myfile << " " << middleEntropy << " " << approximateEntropy;
         myfile << "\n";
     }
     /*Real leftEntropy = maxEntropy2(N,positions,weights,sites,time1);
@@ -280,14 +280,14 @@ void overlapToText(string title, Real time1, Real time2, int N, std::vector<int>
 }
 
 int main(int argc, char* argv[]) {
-    int N = 6;
+    int N = 12;
     int mypositions[] = {1,N/2+1,N/2,N/2+1};
     Real myweights[] = {0.75,-1,-1,-0.5};
     std::vector<int> positions(mypositions,mypositions+4);
     std::vector<Real> weights(myweights,myweights+4);
     SpinHalf spins = SpinHalf(N);
-    //overlapToText("Overlap10q.txt", 0.65, 0.75, N, positions, weights, 0.001);
-    timeToText("SixQubitEvolution2.txt",N,positions,weights,0.01);
+    overlapToText("Overlap12q.txt", 0.67, 0.69, N, positions, weights, 0.0001);
+    //timeToText("ElevenQubitEvolution2.txt",N,positions,weights,0.0005);
     //qubitCountToText("NQubitEvolution.txt",16,weights,0.01);
     /*for(Real s = 0.75; s<= 1; s+=0.01){
         MPO Ham = getHam(N, positions, weights, spins, s);
