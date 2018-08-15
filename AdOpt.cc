@@ -75,7 +75,8 @@ MPO getHam(int N, std::vector<int> positions, std::vector<Real> weights, SpinHal
 ITensor getTrueEigenstates(MPO Ham, std::vector<MPS> givenStates){
     int dim = givenStates.size();
     Index i1 = Index("i1",dim);
-    Index i2 = Index("i2",dim);
+    // Index i2 = Index("i2",dim);
+    Index i2 = prime(i1);
     ITensor Ham2 = ITensor(i1,i2);
     for(int i = 0; i < dim; i++){
         for(int j = 0; j < dim; j++){
