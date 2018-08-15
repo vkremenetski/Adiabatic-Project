@@ -24,18 +24,20 @@ Real gapEDMPO(MPO Ham) {
 
   return (D.real(ci(ci.m() - 1), prime(ci)(ci.m() - 1)) - D.real(ci(ci.m()), prime(ci)(ci.m())));
 }
+
 template <typename MPS, typename Real>
 std::vector<std::pair<MPS,Real>> zipp(std::vector<MPS> A, std::vector<Real> B){
     auto zipped = std::vector<std::pair<MPS,Real>>(0);
     for(int i = 0; i<A.size(); i++){
         zipped.push_back(std::make_pair(A.at(i),B.at(i)));
     }
+
     return zipped;
 }
 
-/*bool helper1(std::pair<MPS, Real> p1, std::pair<MPS, Real> p2){
+bool helper3(std::pair<MPS, Real> p1, std::pair<MPS, Real> p2){
     return (p1.second < p2.second);
-}*/
+}
 
 /* Returns MPO for Hamiltonian.
  * N refers to the number of qubits in the system.
@@ -159,7 +161,7 @@ std::vector<Real> gapAndEntropy(int N, std::vector<int> p, std::vector<Real> w, 
         EnStates.push_back(psiI);
         En.push_back(Ei);
     }
-    //auto EnS = zipp(EnStates, En);
+    auto EnS = zipp(EnStates, En);
     ITensor U = getTrueEigenstates(Ham, EnStates);
     IndexSet is = U.inds();
     Index i1 = is.index(1);
@@ -168,9 +170,9 @@ std::vector<Real> gapAndEntropy(int N, std::vector<int> p, std::vector<Real> w, 
     auto b = U.cplx(i1(1),i2(2));
     auto GS = (a*EnStates.at(0)).plusEq(b*EnStates.at(1)); 
     Real entropy = maxEntropy2(N,p,w,sites,s);
-    std::sort(En.begin(),En.end());
-    Real gap = En[1]-En[0];
-    printfln("DMRG GS: ", En[0]);
+    std::sort(EnS.begin(),EnS.end(), helper3);
+    Real gap = EnS[1].second - EnS[0].second;
+    printfln("DMRG GS: ", EnS[0].second);
     printfln("Our GS: ", overlap(GS, Ham, GS));
     auto results = std::vector<Real>(2);
     results.at(0) = gap;
