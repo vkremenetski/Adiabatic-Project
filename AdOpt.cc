@@ -24,18 +24,20 @@ Real gapEDMPO(MPO Ham) {
 
   return (D.real(ci(ci.m() - 1), prime(ci)(ci.m() - 1)) - D.real(ci(ci.m()), prime(ci)(ci.m())));
 }
+
 template <typename MPS, typename Real>
 std::vector<std::pair<MPS,Real>> zipp(std::vector<MPS> A, std::vector<Real> B){
     auto zipped = std::vector<std::pair<MPS,Real>>(0);
     for(int i = 0; i<A.size(); i++){
         zipped.push_back(std::make_pair(A.at(i),B.at(i)));
     }
+
     return zipped;
 }
 
-/*bool helper1(std::pair<MPS, Real> p1, std::pair<MPS, Real> p2){
+bool helper3(std::pair<MPS, Real> p1, std::pair<MPS, Real> p2){
     return (p1.second < p2.second);
-}*/
+}
 
 /* Returns MPO for Hamiltonian.
  * N refers to the number of qubits in the system.
@@ -268,8 +270,8 @@ void overlapToText(string title, Real time1, Real time2, int N, std::vector<int>
     MPO Ham2 = getHam(N,positions, weights, sites, time2);
     auto psi1 = gsAndES1(Ham1, sites, 3).at(0);
     auto psi2 = gsAndES1(Ham2, sites, 3).at(0);
-    Real t1 = 0.683;
-    Real t2 = 0.686;
+    Real t1 = time1;
+    Real t2 = time2;
     for(Real s = t1; s<= t2; s += step){
         MPO middleHam = getHam(N,positions,weights,sites,s);
         //Real middleEntropy = maxEntropy2(N,positions,weights,sites,s);
@@ -293,15 +295,15 @@ void overlapToText(string title, Real time1, Real time2, int N, std::vector<int>
 }
 
 int main(int argc, char* argv[]) {
-    int N = 6;
+    int N = 10;
     int mypositions[] = {1,N/2+1,N/2,N/2+1};
     Real myweights[] = {0.75,-1,-1,-0.5};
     std::vector<int> positions(mypositions,mypositions+4);
     std::vector<Real> weights(myweights,myweights+4);
     SpinHalf spins = SpinHalf(N);
     //auto x = gapAndEntropy(N,positions, weights, spins, 0.684);
-    //overlapToText("Overlap12q2.txt", 0.65, 0.75, N, positions, weights, 0.00005);
-    timeToText("SixQubitEvolution3.txt",N,positions,weights,0.01);
+    overlapToText("Overlap10q2.txt", 0.65, 0.75, N, positions, weights, 0.001);
+    //timeToText("SixQubitEvolution3.txt",N,positions,weights,0.01);
     //qubitCountToText("NQubitEvolution.txt",16,weights,0.01);
     /*for(Real s = 0.75; s<= 1; s+=0.01){
         MPO Ham = getHam(N, positions, weights, spins, s);
