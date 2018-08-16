@@ -202,7 +202,7 @@ Real maxEntropy2(int N, std::vector<int> p, std::vector<Real> w, SpinHalf sites,
 
 std::vector<Real> gapAndEntropy(int N, std::vector<int> p, std::vector<Real> w, SpinHalf sites, Real s){
     MPO Ham = getHam(N,p,w,sites,s);
-    auto gsES = gsAndES1(Ham, sites, 5);
+    auto gsES = gsAndES1(Ham, sites, 10);
     Real entropy = maxEntropy2(N, p, w, sites, s);
     auto results = std::vector<Real>(2);
     results.at(0) = overlap(gsES.at(1), Ham, gsES.at(1)) - overlap(gsES.at(0), Ham, gsES.at(0));
@@ -295,15 +295,15 @@ void overlapToText(string title, Real time1, Real time2, int N, std::vector<int>
 }
 
 int main(int argc, char* argv[]) {
-    int N = 10;
+    int N = 6;
     int mypositions[] = {1,N/2+1,N/2,N/2+1};
     Real myweights[] = {0.75,-1,-1,-0.5};
     std::vector<int> positions(mypositions,mypositions+4);
     std::vector<Real> weights(myweights,myweights+4);
     SpinHalf spins = SpinHalf(N);
     //auto x = gapAndEntropy(N,positions, weights, spins, 0.684);
-    overlapToText("Overlap10q2.txt", 0.65, 0.75, N, positions, weights, 0.001);
-    //timeToText("SixQubitEvolution3.txt",N,positions,weights,0.01);
+    //overlapToText("Overlap10q2.txt", 0.65, 0.75, N, positions, weights, 0.001);
+    timeToText("SixQubitEvolution4.txt",N,positions,weights,0.01);
     //qubitCountToText("NQubitEvolution.txt",16,weights,0.01);
     /*for(Real s = 0.75; s<= 1; s+=0.01){
         MPO Ham = getHam(N, positions, weights, spins, s);
