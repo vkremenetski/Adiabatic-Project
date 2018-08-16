@@ -89,6 +89,68 @@ ITensor getTrueEigenstates(MPO Ham, std::vector<MPS> givenStates){
     diagHermitian(Ham2, U, d);
     return U;
 }
+
+//returns a state that is a linear combination of EnStates.
+MPS getState(std::vector<Cplx> coefficients, std::vector<MPS> EnStates){
+    MPS state = coefficients.at(0)*EnStates.at(0);
+    for(int i = 1; i < EnStates.size(); i++){
+        state = (coefficients.at(i)*EnStates.at(i)).plusEq(state);
+    }
+    normalize(state);
+    return state;
+}
+
+//Returns the lowest two energy eigenstates of the given Hamiltonian.
+//ELevels - the amount of levels we tell DMRG to find (in case it finds the energy levels out of order).
+std::vector<MPS> gsAndES1(MPO Ham, SpinHalf sites, int ELevels){
+    auto psi0 = MPS(sites);
+    auto EnStates = std::vector<MPS>(1);
+    auto sweeps = Sweeps(18);
+    sweeps.maxm() = 50, 50, 100, 100, 200;
+    sweeps.cutoff() = 1E-10;
+    sweeps.noise() = 1e-1, 3e-2, 1e-2, 3e-3, 1e-3, 3e-4, 1e-4, 3e-5, 1e-5, 3e-6, 1e-6, 3e-7, 1e-7, 3e-8, 1e-8, 3e-9, 1e-9, 0;
+    dmrg(psi0, Ham, sweeps, "Quiet");
+    EnStates.at(0) = psi0;
+    for(int i = 1; i < ELevels; i++){
+        MPS psiI = MPS(sites);
+        dmrg(psiI, Ham, EnStates, sweeps, {"Quiet=", true, "Weight=", 20});
+        EnStates.push_back(psiI);
+    }
+    ITensor U = getTrueEigenstates(Ham, EnStates);
+    IndexSet is = U.inds();
+    Index i1 = is.index(1);
+    Index i2 = is.index(2);
+    Real GSenergy = 100;
+    Real ES1energy = 100;
+    MPS GS;
+    MPS ES1;
+    for(int i = 0; i < ELevels; i++){
+        auto coefficients = std::vector<Cplx>(ELevels);
+        for(int j = 0; j < ELevels; j++){
+            coefficients.at(j) = U.cplx(i1(i+1),i2(j+1));
+        }
+        MPS state = getState(coefficients, EnStates);
+        Real EVal = overlap(state, Ham, state);
+        if(EVal < GSenergy){
+            Real intermediate = GSenergy;
+            GSenergy = EVal;
+            auto intermediateState = GS;
+            GS = state;
+            if(intermediate < ES1energy){
+                ES1energy = intermediate;
+                ES1 = intermediateState;
+            }
+        }
+        else if(EVal < ES1energy){
+            ES1energy = EVal;
+            ES1 = state;
+        }
+    }
+    auto gsAndEs = std::vector<MPS>(2);
+    gsAndEs.at(0) = GS;
+    gsAndEs.at(1) = ES1;
+    return gsAndEs;
+}
 /*Finds entanglement entropy of MPS state across "bond".
  * */
 Real getEntropy(MPS state, int bond){
@@ -124,13 +186,8 @@ Real maxEntropy2(int N, std::vector<int> p, std::vector<Real> w, SpinHalf sites,
             if(p.at(j) > N){p.at(j) = p.at(j) - N;}
         }
         MPO Ham = getHam(N,p,w,sites,s);
-        MPS psi = MPS(sites);
-        auto sweeps = Sweeps(22);
-        sweeps.maxm() = 50,50,100,100,400;
-        sweeps.noise() = 3e-1, 1e-1, 3e-2, 1e-2, 3e-3, 1e-3, 3e-4, 1e-4, 3e-5, 1e-5, 3e-6, 1e-6, 3e-7, 1e-7, 3e-8, 1e-8, 3e-9, 1e-9, 3e-10, 1e-10, 3e-11, 0;
-        sweeps.cutoff() = 1E-11;
-        dmrg(psi,Ham,sweeps,"Quiet");
-        Real ent = maxEntropy(psi);
+        auto gsES = gsAndES1(Ham, sites, 2);
+        Real ent = maxEntropy(gsES.at(0));
         if(ent > entropy){entropy = ent;}
     }
     return entropy;
@@ -142,41 +199,15 @@ Real maxEntropy2(int N, std::vector<int> p, std::vector<Real> w, SpinHalf sites,
  */
 
 std::vector<Real> gapAndEntropy(int N, std::vector<int> p, std::vector<Real> w, SpinHalf sites, Real s){
-    auto psi0 = MPS(sites);
-    auto EnStates = std::vector<MPS>(1);
-    auto En = std::vector<Real>(1);
-    auto sweeps = Sweeps(22);
-    sweeps.maxm() = 50,50,100,100,200,400;
-    sweeps.cutoff() = 1E-11;
-    sweeps.noise() = 3e-1, 1e-1, 3e-2, 1e-2, 3e-3, 1e-3, 3e-4, 1e-4, 3e-5, 1e-5, 3e-6, 1e-6, 3e-7, 1e-7, 3e-8, 1e-8, 3e-9, 1e-9, 3e-10, 1e-10, 3e-11, 0;
     MPO Ham = getHam(N,p,w,sites,s);
-    auto E0 = dmrg(psi0,Ham,sweeps,{"Quiet=",true});
-    EnStates.at(0) = psi0;
-    En.at(0) = E0;
-    for(int i=1; i<2; i++){
-        MPS psiI = MPS(sites);
-        Real Ei = dmrg(psiI,Ham,EnStates,sweeps,{"Quiet=",true,"Weight=",20});
-        EnStates.push_back(psiI);
-        En.push_back(Ei);
-    }
-    //auto EnS = zipp(EnStates, En);
-    ITensor U = getTrueEigenstates(Ham, EnStates);
-    IndexSet is = U.inds();
-    Index i1 = is.index(1);
-    Index i2 = is.index(2);
-    auto a = U.cplx(i1(1),i2(1));
-    auto b = U.cplx(i1(1),i2(2));
-    auto GS = (a*EnStates.at(0)).plusEq(b*EnStates.at(1)); 
-    Real entropy = maxEntropy2(N,p,w,sites,s);
-    std::sort(En.begin(),En.end());
-    Real gap = En[1]-En[0];
-    printfln("DMRG GS: ", En[0]);
-    printfln("Our GS: ", overlap(GS, Ham, GS));
+    auto gsES = gsAndES1(Ham, sites, 5);
+    Real entropy = maxEntropy2(N, p, w, sites, s);
     auto results = std::vector<Real>(2);
-    results.at(0) = gap;
+    results.at(0) = overlap(gsES.at(1), Ham, gsES.at(1)) - overlap(gsES.at(0), Ham, gsES.at(0));
     results.at(1) = entropy;
     return results;
 }
+
 bool helper1(std::vector<Real> v1, std::vector<Real> v2){
     return (v1[0] < v2[0]);
 }
@@ -202,7 +233,7 @@ void timeToText(string title,int N, std::vector<int> positions, std::vector<Real
     ofstream myfile;
     myfile.open(title);
     auto sites = SpinHalf(N);
-    for(Real s=0.68; s<0.69+step; s+= step){
+    for(Real s=0; s<1+step; s+= step){
         auto results = gapAndEntropy(N, positions, weights, sites, s);
         myfile << s << " " << results.at(0) << " " << results.at(1);
         myfile << "\n";
@@ -233,23 +264,16 @@ void overlapToText(string title, Real time1, Real time2, int N, std::vector<int>
     ofstream myfile;
     myfile.open(title);
     auto sites = SpinHalf(N);
-    auto psi1 = MPS(sites);
-    auto psi2 = MPS(sites);
-    auto sweeps = Sweeps(26);
-    sweeps.maxm() = 50,50,100,100,200,300,500,1000,2000;
-    sweeps.cutoff() = 1E-12;
-    sweeps.noise() = 1, 3e-1, 1e-1, 3e-2, 1e-2, 3e-3, 1e-3, 3e-4, 1e-4, 3e-5, 1e-5, 3e-6, 1e-6, 3e-7, 1e-7, 3e-8, 1e-8, 3e-9, 1e-9, 3e-10, 1e-10, 3e-11, 1e-11, 3e-12, 1e-12, 0;
     MPO Ham1 = getHam(N,positions, weights, sites, time1);
     MPO Ham2 = getHam(N,positions, weights, sites, time2);
-    Real t1 = 0.6835;
-    Real t2 = 0.6855;
-    dmrg(psi1, Ham1, sweeps, "Quiet");
-    dmrg(psi2, Ham2, sweeps, "Quiet");
+    auto psi1 = gsAndES1(Ham1, sites, 3).at(0);
+    auto psi2 = gsAndES1(Ham2, sites, 3).at(0);
+    Real t1 = 0.683;
+    Real t2 = 0.686;
     for(Real s = t1; s<= t2; s += step){
-        auto middlePsi = MPS(sites);
         MPO middleHam = getHam(N,positions,weights,sites,s);
         //Real middleEntropy = maxEntropy2(N,positions,weights,sites,s);
-        dmrg(middlePsi, middleHam, sweeps, "Quiet");
+        auto middlePsi = gsAndES1(middleHam, sites, 3).at(0);
         auto innProd1 = overlap(middlePsi, psi1);
         auto innProd2 = overlap(middlePsi, psi2);
         myfile << s << " " << innProd1 << " " << innProd2;
@@ -269,15 +293,15 @@ void overlapToText(string title, Real time1, Real time2, int N, std::vector<int>
 }
 
 int main(int argc, char* argv[]) {
-    int N = 7;
+    int N = 6;
     int mypositions[] = {1,N/2+1,N/2,N/2+1};
     Real myweights[] = {0.75,-1,-1,-0.5};
     std::vector<int> positions(mypositions,mypositions+4);
     std::vector<Real> weights(myweights,myweights+4);
     SpinHalf spins = SpinHalf(N);
-    auto x = gapAndEntropy(N,positions, weights, spins, 0.5);
-    //overlapToText("Overlap14q.txt", 0.65, 0.75, N, positions, weights, 0.00002);
-    //timeToText("ThirteenQubitEvolution2.txt",N,positions,weights,0.0002);
+    //auto x = gapAndEntropy(N,positions, weights, spins, 0.684);
+    //overlapToText("Overlap12q2.txt", 0.65, 0.75, N, positions, weights, 0.00005);
+    timeToText("SixQubitEvolution3.txt",N,positions,weights,0.01);
     //qubitCountToText("NQubitEvolution.txt",16,weights,0.01);
     /*for(Real s = 0.75; s<= 1; s+=0.01){
         MPO Ham = getHam(N, positions, weights, spins, s);
