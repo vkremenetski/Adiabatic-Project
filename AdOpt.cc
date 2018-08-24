@@ -98,7 +98,7 @@ ITensor getTrueEigenstates(MPO Ham, std::vector<MPS> givenStates){
 MPS getState(std::vector<Cplx> coefficients, std::vector<MPS> EnStates){
     MPS state = coefficients.at(0)*EnStates.at(0);
     for(int i = 1; i < EnStates.size(); i++){
-      state = (coefficients.at(i)*EnStates.at(i)).plusEq(state);
+      state = (coefficients.at(i)*EnStates.at(i)).plusEq(state,{"Maxm",100,"Cutoff",1E-11});
     }
     normalize(state);
     return state;
@@ -207,7 +207,7 @@ Real maxEntropy2(int N, std::vector<int> p, std::vector<Real> w, SpinHalf sites,
 
 std::vector<Real> gapAndEntropy(int N, std::vector<int> p, std::vector<Real> w, SpinHalf sites, Real s){
     MPO Ham = getHam(N,p,w,sites,s);
-    auto gsES = gsAndES1(Ham, sites, 10);
+    auto gsES = gsAndES1(Ham, sites, 5);
     //Real entropy = maxEntropy2(N, p, w, sites, s);
     Real entropy = maxEntropy(gsES.at(0));
     auto results = std::vector<Real>(2);
@@ -286,7 +286,7 @@ void overlapToText(string title, Real time1, Real time2, int N, std::vector<int>
         auto middlePsi = gsAndES1(middleHam, sites, 4).at(0);
         auto innProd1 = overlapC(middlePsi, psi1);
         auto innProd2 = overlapC(middlePsi, psi2);
-        myfile << s << " " << innProd1 << " " << innProd2;
+        myfile << s << " " << std::norm(innProd1) << " " << std::norm(innProd2);
         /*auto complexInProd1 = overlapC(middlePsi, psi1);
         auto complexInProd2 = overlapC(middlePsi, psi2);
         auto approximatePsi = (complexInProd1 * psi1).plusEq(complexInProd2*psi2);
@@ -303,14 +303,15 @@ void overlapToText(string title, Real time1, Real time2, int N, std::vector<int>
 }
 
 int main(int argc, char* argv[]) {
-    int N = 6;
+    int N = 10;
     int mypositions[] = {1,N/2+1,N/2,N/2+1};
     Real myweights[] = {0.75,-1,-1,-0.5};
     std::vector<int> positions(mypositions,mypositions+4);
     std::vector<Real> weights(myweights,myweights+4);
     SpinHalf spins = SpinHalf(N);
     //timeToText("SixQubitEvolution3.txt", N, positions, weights, 0.01);
-    auto x = gapAndEntropy(N,positions, weights, spins, 0.685);
+    overlapToText("Overlap10q2.txt", 0.65, 0.75, N,positions,weights, 0.0002);
+    //auto x = gapAndEntropy(N,positions, weights, spins, 0.685);
     //qubitCountToText("NQubitEvolution.txt",16,weights,0.01);
     /*for(Real s = 0.75; s<= 1; s+=0.01){
         MPO Ham = getHam(N, positions, weights, spins, s);
